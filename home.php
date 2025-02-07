@@ -23,6 +23,7 @@ $products = $db->query("SELECT * FROM products");
 
 <body class="container mt-4">
     <h1 class="text-center mb-4">POS System</h1>
+    <div ><a href="controllers/logout.php">LOGOUT</a></div>
 
     <div class="row gx-5">
         <div class="col-8 ">
@@ -100,7 +101,6 @@ $products = $db->query("SELECT * FROM products");
             </table>
         </div>
     </div>
-
 </body>
 
 </html>
