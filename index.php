@@ -1,5 +1,5 @@
 <?php
-include('./db_connect.php');
+include('./db_connection/db_connect.php');
 session_start();
 
 if (!isset($_SESSION['cart'])) {
@@ -43,7 +43,7 @@ $products = $db->query("SELECT * FROM products");
                         <td>$<?php echo $product['price']; ?></td>
                         <td><?php echo $product['stock']; ?></td>
                         <td>
-                            <form action="add_to_cart.php" method="post" class="d-flex">
+                            <form action="./controllers/add_to_cart.php" method="post" class="d-flex">
                                 <input type="hidden" name="product_id" value="<?php echo $product['id']; ?>">
                                 <input type="number" name="quantity" value="1" min="1" max="<?php echo $product['stock']; ?>" class="form-control me-2" style="width: 80px;">
                                 <button type="submit" class="btn btn-primary">Add to Cart</button>
@@ -81,7 +81,7 @@ $products = $db->query("SELECT * FROM products");
                     <td>$<?php echo $product['price']; ?></td>
                     <td>$<?php echo $subtotal; ?></td>
                     <td>
-                        <form action="remove_from_cart.php" method="post">
+                        <form action="./controllers/remove_from_cart.php" method="post">
                             <input type="hidden" name="product_id" value="<?php echo $product_id; ?>">
                             <button type="submit" class="btn btn-danger">Remove</button>
                         </form>
@@ -92,7 +92,7 @@ $products = $db->query("SELECT * FROM products");
                 <td colspan="3" class="fw-bold">Total</td>
                 <td class="fw-bold">$<?php echo $total; ?></td>
                 <td>
-                    <form action="checkout.php" method="post">
+                    <form action="./controllers/checkout.php" method="post">
                         <button type="submit" class="btn btn-success">Checkout</button>
                     </form>
                 </td>
