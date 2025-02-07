@@ -1,13 +1,9 @@
 <?php
 include('./db_connection/db_connect.php');
 session_start();
-
 if (!isset($_SESSION['cart'])) {
     $_SESSION['cart'] = [];
 }
-
-
-
 $products = $db->query("SELECT * FROM products");
 ?>
 
@@ -23,12 +19,11 @@ $products = $db->query("SELECT * FROM products");
 
 <body class="container mt-4">
     <h1 class="text-center mb-4">POS System</h1>
-    <div ><a href="controllers/logout.php">LOGOUT</a></div>
 
-    <div class="row gx-5">
+    <div class="row">
         <div class="col-8 ">
             <h2 class="mb-3 sticky-title">Products</h2>
-            <div class="row row-cols-1 row-cols-md-3 g-4 products-container" style="max-height: 700px; overflow-y: scroll;">
+            <div class="row row-cols-1 row-cols-md-3 g-2 products-container" style="max-height: 700px; overflow-y: scroll;">
                 <?php while ($product = $products->fetch_assoc()): ?>
                     <div class="col">
                         <div class="card h-100 d-flex flex-column">
@@ -38,13 +33,12 @@ $products = $db->query("SELECT * FROM products");
                                 <p class="card-text">$<?php echo $product['price']; ?></p>
                                 <p class="card-text">Stock: <?php echo $product['stock']; ?></p>
 
-                                <!-- Push form to bottom in all cards -->
                                 <div class="mt-auto d-flex align-items-center">
                                     <form action="./controllers/add_to_cart.php" method="post" class="d-flex w-100">
                                         <input type="hidden" name="product_id" value="<?php echo $product['id']; ?>">
                                         <input type="number" name="quantity" value="1" min="1" max="<?php echo $product['stock']; ?>"
                                             class="form-control me-2" style="width: 80px;">
-                                        <button type="submit" class="btn btn-primary">Add to Cart</button>
+                                        <button type="submit" class="btn btn-primary">Add to Order</button>
                                     </form>
                                 </div>
                             </div>
@@ -52,11 +46,10 @@ $products = $db->query("SELECT * FROM products");
                     </div>
                 <?php endwhile; ?>
             </div>
-
         </div>
 
         <div class="col-4  gx-5">
-            <h2 class="mt-4 mb-4">Shopping Cart</h2>
+            <h2 class="mt-4 mb-4">Order List</h2>
             <table class="table table-bordered table-striped">
                 <thead class="table-dark">
                     <tr>
@@ -81,10 +74,8 @@ $products = $db->query("SELECT * FROM products");
                             <td>$<?php echo $product['price']; ?></td>
                             <td>$<?php echo $subtotal; ?></td>
                             <td>
-                                <form action="./controllers/remove_from_cart.php" method="post">
-                                    <input type="hidden" name="product_id" value="<?php echo $product_id; ?>">
-                                    <button type="submit" class="btn btn-danger">Remove</button>
-                                </form>
+                                <button class="btn btn-danger" onclick="showRemoveModal()">Remove</button>
+
                             </td>
                         </tr>
                     <?php endforeach; ?>
@@ -99,8 +90,54 @@ $products = $db->query("SELECT * FROM products");
                     </tr>
                 </tbody>
             </table>
+            <div><a href="#" class="btn btn-primary" onclick="showLogoutModal()">LOGOUT</a></div>
         </div>
     </div>
+
+    <!-- Logout Confirmation Modal -->
+    <div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered"> <!-- Added modal-dialog-centered -->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="logoutModalLabel">Confirm Logout</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to log out?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <a href="controllers/logout.php" class="btn btn-danger">Logout</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Remove Item Confirmation Modal -->
+    <div class="modal fade" id="removeModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="logoutModalLabel">Confirm Removing of Item</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to remove this item from the order list?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <form action="./controllers/remove_from_cart.php" method="post">
+                        <input type="hidden" name="product_id" value="<?php echo $product_id; ?>">
+                        <button type="submit" class="btn btn-danger">Remove</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="./assets/scripts/scirpt.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>
