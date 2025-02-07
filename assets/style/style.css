@@ -1,7 +1,72 @@
+body {
+  background-color: #303841 !important;
+}
+* {
+  color: #eeeeee !important;
+  font-family: Inter, sans-serif;
+}
+
+.btn {
+  background-color: #00adb5 !important;
+}
+
+.card {
+  background-color: #3a4750 !important;
+}
+
 .sticky-title {
   position: sticky;
   top: 0;
   background: white;
   z-index: 10;
   padding: 10px 0;
+  background-color: #303841 !important;
+}
+
+table {
+  color: #303841 !important;
+}
+.modal-content {
+  background-color: #303841 !important;
+}
+
+.form-control::placeholder {
+  /* Chrome, Firefox, Opera, Safari 10.1+ */
+  color: #eeeeee;
+  opacity: 1; /* Firefox */
+}
+
+.form-control:-ms-input-placeholder {
+  /* Internet Explorer 10-11 */
+  color: #eeeeee;
+}
+
+.form-control::-ms-input-placeholder {
+  /* Microsoft Edge */
+  color: #eeeeee;
+}
+
+/* width */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: #eeeeee;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #00adb5;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: darkcyan;
+}
+
+.title {
+  font-size: 54px;
+  font-weight: 600;
 }

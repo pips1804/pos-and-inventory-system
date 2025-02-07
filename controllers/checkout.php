@@ -7,6 +7,13 @@ if ($db->connect_error) {
     die("Connection failed: " . $db->connect_error);
 }
 
+// Check if cart is empty
+if (empty($_SESSION['cart'])) {
+    $_SESSION['checkout_message'] = "Your cart is empty. Please add items before checking out.";
+    header("Location: ../home.php"); // Redirect back to main page
+    exit();
+}
+
 $total = 0;
 foreach ($_SESSION['cart'] as $product_id => $item) {
     $product = $db->query("SELECT * FROM products WHERE id = $product_id")->fetch_assoc();
@@ -22,6 +29,9 @@ foreach ($_SESSION['cart'] as $product_id => $item) {
     $db->query("UPDATE products SET stock = stock - {$item['quantity']} WHERE id = $product_id");
 }
 
+// Clear cart
 $_SESSION['cart'] = [];
+$_SESSION['checkout_message'] = "Checkout successful! Your order ID is: $order_id";
 
-echo "Checkout successful! Order ID: $order_id";
+header("Location: ../home.php"); // Redirect back to main page
+exit();
