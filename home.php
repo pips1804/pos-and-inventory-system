@@ -18,24 +18,33 @@ $products = $db->query("SELECT * FROM products");
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Reenie+Beanie&display=swap" rel="stylesheet">
-
 </head>
 
 <body class="m-5">
     <p class="text-center title">Point of Sales System</p>
 
+    <div class="d-flex justify-content-center">
+        <form class="w-50 d-flex">
+            <div class="input-group">
+                <input type="text" id="searchBox" class="form-control" placeholder="Search products..." style="background-color: #3A4750;">
+            </div>
+        </form>
+    </div>
+
     <div class="row">
         <div class="col-8 ">
             <h1 class="mb-3 sticky-title">Products</h1>
-            <div class=" row row-cols-1 row-cols-md-4 g-2 products-container" style="max-height: 650px; overflow-y: scroll;">
+            <div class=" row row-cols-1 row-cols-md-4 g-2 products-container" style="max-height: 460px; overflow-y: scroll;">
                 <?php while ($product = $products->fetch_assoc()): ?>
                     <div class="col">
                         <div class="card h-100 d-flex flex-column" style="max-width: 300px;">
                             <img src="./assets/img/sample_img.jpg" class="card-img-top" alt="./assets/img/sample_img.jpg">
                             <div class="card-body d-flex flex-column">
                                 <h4 class="card-title font-weight-bold"><?php echo $product['name']; ?></h4>
-                                <p class="card-text"><?php echo $product['description']; ?></p>
-                                <p class="card-text">$<?php echo $product['price']; ?></p>
+                                <p class="card-text d-inline-block text-truncate" style="cursor: pointer;" data-bs-toggle="tooltip" title="<?php echo htmlspecialchars($product['description']); ?>">
+                                    <?php echo $product['description']; ?>
+                                </p>
+                                <p class="card-text">₱<?php echo $product['price']; ?></p>
                                 <p class="card-text">Stock: <?php echo $product['stock']; ?></p>
 
                                 <div class="mt-auto d-flex align-items-center">
@@ -68,6 +77,7 @@ $products = $db->query("SELECT * FROM products");
                 <tbody>
                     <?php
                     $total = 0;
+                    $taxRate = .12;
                     foreach ($_SESSION['cart'] as $product_id => $item):
                         $product = $db->query("SELECT * FROM products WHERE id = $product_id")->fetch_assoc();
                         $subtotal = $item['quantity'] * $product['price'];
@@ -76,8 +86,8 @@ $products = $db->query("SELECT * FROM products");
                         <tr>
                             <td><?php echo $product['name']; ?></b></td>
                             <td><?php echo $item['quantity']; ?></td>
-                            <td>$<?php echo $product['price']; ?></td>
-                            <td>$<?php echo $subtotal; ?></td>
+                            <td>₱<?php echo $product['price']; ?></td>
+                            <td>₱<?php echo $subtotal; ?></td>
                             <td>
                                 <button class="btn " onclick="showRemoveModal()">Remove</button>
 
@@ -85,8 +95,8 @@ $products = $db->query("SELECT * FROM products");
                         </tr>
                     <?php endforeach; ?>
                     <tr>
-                        <td colspan="3" class="fw-bold">Total</td>
-                        <td class="fw-bold">$<?php echo $total; ?></td>
+                        <td colspan="3" class="fw-bold">Total with tax (₱<?php echo $total * $taxRate; ?>)</td>
+                        <td class="fw-bold">₱<?php echo $total * $taxRate + $total; ?></td>
                         <td>
                             <form action="./controllers/checkout.php" method="post" onsubmit="disableCheckoutButton()">
                                 <button type="submit" class="btn" id="checkoutButton">Checkout</button>
@@ -95,116 +105,17 @@ $products = $db->query("SELECT * FROM products");
                     </tr>
                 </tbody>
             </table>
-            <div class="row align-middle">
-                <a href="#" class="btn col-2" onclick="showLogoutModal()">Log out</a>
-                <form action="./controllers/remove_cart.php" method="post" class="col-10">
-                    <button type="submit" class="btn" id="removeCartButton">Remove All Items</button>
-                </form>
+            <div class="row align-items-center">
+                <a href="#" class="btn w-auto me-2" onclick="showLogoutModal()">Log out</a>
+                <button onclick="showRemoveAllModal()" class="btn w-auto" id="removeCartButton">Remove All Items</button>
             </div>
+
         </div>
     </div>
 
-    <!-- Logout Confirmation Modal -->
-    <div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered"> <!-- Added modal-dialog-centered -->
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="logoutModalLabel">Confirm Logout</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    Are you sure you want to log out?
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn " data-bs-dismiss="modal">Cancel</button>
-                    <a href="controllers/logout.php" class="btn">Logout</a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-
-    <!-- Remove Item Confirmation Modal -->
-    <div class="modal fade" id="removeModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="logoutModalLabel">Confirm Removing of Item</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    Are you sure you want to remove this item from the order list?
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn " data-bs-dismiss="modal">Cancel</button>
-                    <form action="./controllers/remove_from_cart.php" method="post">
-                        <input type="hidden" name="product_id" value="<?php echo $product_id; ?>">
-                        <button type="submit" class="btn">Remove</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Checkout Message Modal -->
-    <div class="modal fade" id="checkoutModal" tabindex="-1" aria-labelledby="checkoutModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="checkoutModalLabel">Order Status</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <p id="checkoutMessage"></p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Remove All Cart Items Message Modal -->
-    <div class="modal fade" id="removeCartModal" tabindex="-1" aria-labelledby="removeCartLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="removeModalLabel">Remove all items from cart?</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <p id="removeCartMessage"></p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            var checkoutMessage = <?php echo isset($_SESSION['checkout_message']) ? json_encode($_SESSION['checkout_message']) : 'null'; ?>;
-            if (checkoutMessage) {
-                document.getElementById("checkoutMessage").innerText = checkoutMessage;
-                var checkoutModal = new bootstrap.Modal(document.getElementById('checkoutModal'));
-                checkoutModal.show();
-                <?php unset($_SESSION['checkout_message']); ?> // Clear the message after displaying
-            }
-        });
-
-        document.addEventListener("DOMContentLoaded", function() {
-            var removeCartMessage = <?php echo isset($_SESSION['remove_message']) ? json_encode($_SESSION['remove_message']) : 'null'; ?>;
-            if (removeCartMessage) {
-                document.getElementById("removeCartMessage").innerText = removeCartMessage;
-                var removeCartModal = new bootstrap.Modal(document.getElementById('removeCartModal'));
-                removeCartModal.show();
-                <?php unset($_SESSION['remove_message']); ?> // Clear the message after displaying
-            }
-        });
-    </script>
-
+    <?php
+    include_once('./modals.php');
+    ?>
 
     <script src="./assets/scripts/scirpt.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
