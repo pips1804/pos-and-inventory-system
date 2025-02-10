@@ -10,10 +10,10 @@ if ($products->num_rows > 0) {
     while ($product = $products->fetch_assoc()): ?>
         <div class="col">
             <div class="card h-100 d-flex flex-column" style="max-width: 300px;">
-                <img src="./assets/img/sample_img.jpg" class="card-img-top" alt="Product Image">
+                <img src="./assets/img/pou.png" class="card-img-top" alt="Product Image">
                 <div class="card-body d-flex flex-column">
                     <h4 class="card-title font-weight-bold"><?php echo $product['name']; ?></h4>
-                    <p class="card-text"><?php echo $product['description']; ?></p>
+                    <p class="card-text d-inline-block text-truncate" style="cursor: pointer;"><?php echo $product['description']; ?></p>
                     <p class="card-text">₱<?php echo $product['price']; ?></p>
                     <p class="card-text">Stock: <?php echo $product['stock']; ?></p>
                     <div class="mt-auto d-flex align-items-center">

@@ -15,7 +15,7 @@
 
     <h1 class="text-center mb-3">Point of Sales System</h1>
     <div class="text-center mb-2">
-        <button class="btn " onclick="loadPage('./mainpage')">Home</button>
+        <a class="btn " href="home.php">Home</a>
         <button class="btn " onclick="loadPage('./sales_report')">Sales Report</button>
     </div>
 
@@ -25,7 +25,7 @@
     if (!isset($_SESSION['cart'])) {
         $_SESSION['cart'] = [];
     }
-    $products = $db->query("SELECT * FROM products");
+    $products = $db->query("SELECT * FROM products WHERE stock > 0");
     ?>
 
     <div id="content">
@@ -44,7 +44,7 @@
                     <?php while ($product = $products->fetch_assoc()): ?>
                         <div class="col">
                             <div class="card h-100 d-flex flex-column" style="max-width: 300px;">
-                                <img src="./assets/img/sample_img.jpg" class="card-img-top" alt="./assets/img/sample_img.jpg">
+                                <img src="./assets/img/pou.png" class="card-img-top" alt="./assets/img/pou.png">
                                 <div class="card-body d-flex flex-column">
                                     <h4 class="card-title font-weight-bold"><?php echo $product['name']; ?></h4>
                                     <p class="card-text d-inline-block text-truncate" style="cursor: pointer;" data-bs-toggle="tooltip" title="<?php echo htmlspecialchars($product['description']); ?>">
@@ -58,7 +58,8 @@
                                             <input type="hidden" name="product_id" value="<?php echo $product['id']; ?>">
                                             <input type="number" name="quantity" value="1" min="1" max="<?php echo $product['stock']; ?>"
                                                 class="form-control me-2" style="width: 80px; background-color: #3A4750;">
-                                            <button type="submit" class="btn ">Add to Order</button>
+                                            <button type="button" class="btn add-to-cart" data-id="<?php echo $product['id']; ?>" data-stock="<?php echo $product['stock']; ?>">Add to Order</button>
+
                                         </form>
                                     </div>
                                 </div>
@@ -114,7 +115,7 @@
                         </tr>
                     </tbody>
                 </table>
-                <div class=" text-center mb-2">
+                <div class="text-center">
                     <a href="#" class="btn w-auto" onclick="showLogoutModal()">Log out</a>
                     <button onclick="showRemoveAllModal()" class="btn w-auto" id="removeCartButton">Remove All Items</button>
                 </div>
@@ -228,6 +229,37 @@
         // Reattach search function when the page loads
         document.addEventListener("DOMContentLoaded", function() {
             attachSearchFunctionality();
+        });
+
+        document.addEventListener("DOMContentLoaded", function() {
+            const addToCartButtons = document.querySelectorAll(".add-to-cart");
+
+            addToCartButtons.forEach(button => {
+                button.addEventListener("click", function() {
+                    const productId = this.getAttribute("data-id");
+                    const maxStock = this.getAttribute("data-stock");
+                    const quantity = 1;
+
+                    fetch("./controllers/add_to_cart.php", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/x-www-form-urlencoded"
+                            },
+                            body: `product_id=${productId}&quantity=${quantity}`
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.status === "error") {
+                                document.getElementById("removeCartMessage").innerText = data.message;
+                                var modal = new bootstrap.Modal(document.getElementById("removeCartModal"));
+                                modal.show();
+                            } else {
+                                location.reload(); //
+                            }
+                        })
+                        .catch(error => console.error("Error:", error));
+                });
+            });
         });
     </script>
 
