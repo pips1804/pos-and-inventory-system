@@ -14,7 +14,7 @@
 <body class="m-5">
 
     <h1 class="text-center mb-3">Point of Sales System</h1>
-    <div class="text-center mb-2">
+    <div class="text-center mb-3">
         <a class="btn " href="home.php">Home</a>
         <button class="btn " onclick="loadPage('./sales_report')">Sales Report</button>
     </div>
@@ -93,7 +93,7 @@
                         ?>
                             <tr>
                                 <td><?php echo $product['name']; ?></b></td>
-                                <td> <img src="./assets/img/sample_img.jpg" class="card-img-top" alt="./assets/img/sample_img.jpg"></td>
+                                <td> <img src="./assets/img/pou.png" class="card-img-top" alt="./assets/img/sample_img.jpg"></td>
                                 <td><?php echo $item['quantity']; ?></td>
                                 <td>₱<?php echo $product['price']; ?></td>
                                 <td>₱<?php echo $subtotal; ?></td>
