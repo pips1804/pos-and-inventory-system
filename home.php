@@ -192,36 +192,53 @@ function attachRemoveCartEvent() {
 }
 
 document.getElementById("checkoutButton").addEventListener("click", function() {
-    fetch("./controllers/get_cart.php")
+    fetch("controllers/get_cart.php")
         .then(response => response.json())
         .then(cart => {
+            let totalAmount = cart.reduce((sum, item) => sum + item.quantity * item.price, 0);
+
+            // Update stock first
             fetch("http://192.168.100.11:5000/api/update_stock", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ cart })
             })
             .then(response => response.json())
             .then(data => {
                 if (data.status === "success") {
-                    // Clear the cart after a successful stock update
-                    fetch("./controllers/clear_cart.php", {
-                        method: "POST"
+                    // Insert into sales and deliver table
+                    fetch("controllers/add_sales_and_delivery.php", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                        body: `total_amount=${totalAmount}`
                     })
-                    .then(() => {
-                        alert("Checkout successful!");
-                        loadCart(); // Reload cart to reflect changes
+                    .then(response => response.json())
+                    .then(salesData => {
+                        if (salesData.status === "success") {
+                            // Clear the cart after checkout
+                            fetch("controllers/clear_cart.php", {
+                                method: "POST"
+                            })
+                            .then(() => {
+                                alert("Checkout successful!");
+                                loadCart();
+                            })
+                            .catch(error => console.error("Error clearing cart:", error));
+                        } else {
+                            alert("Error: " + salesData.message);
+                        }
                     })
-                    .catch(error => console.error("Error clearing cart:", error));
+                    .catch(error => console.error("Error inserting sales/delivery:", error));
                 } else {
-                    alert(data.message);
+                    alert("Stock update failed: " + data.message);
                 }
             })
             .catch(error => console.error("Error updating stock:", error));
         })
         .catch(error => console.error("Error fetching cart:", error));
 });
+
+
 
 </script>
 </body>
