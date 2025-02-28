@@ -1,7 +1,7 @@
 <?php
 
-session_start();
 include '../db_connection/db_connect.php';
+session_start();
 
 if (isset($_POST['login'])) {
 
