@@ -61,13 +61,80 @@
                 .then(response => response.text())
                 .then(html => {
                     document.getElementById('content').innerHTML = html;
+
                     if (page === 'sales_report') {
-                        console.log("Sales report loaded. Initializing chart...");
-                        loadSalesChart(); // Manually initialize the chart
+                        console.log("✅ Sales report loaded.");
+                        setTimeout(() => {
+                            loadSalesChart(); // Ensure the chart loads correctly
+                            attachPredictionEvent(); // Attach event to Predict button
+                        }, 300);
                     }
                 })
-                .catch(error => console.error('Error loading page:', error));
+                .catch(error => console.error('❌ Error loading page:', error));
         }
+
+        function attachPredictionEvent() {
+            let predictBtn = document.getElementById('predictBtn');
+            let monthsInput = document.getElementById('monthsInput');
+            let output = document.getElementById('predictedSalesOutput');
+
+            if (!predictBtn) {
+                console.error("❌ Predict button not found!");
+                return;
+            }
+
+            predictBtn.addEventListener('click', function() {
+                let inputMonths = parseInt(monthsInput.value);
+                console.log("📢 Predict Button Clicked with input:", inputMonths);
+
+                if (!isNaN(inputMonths) && inputMonths > 0) {
+                    fetch('./controllers/sales_data.php')
+                        .then(response => response.json())
+                        .then(data => {
+                            console.log("✅ Sales Data for Prediction:", data);
+
+                            const dates = data.map((_, i) => i + 1);
+                            const sales = data.map(entry => parseFloat(entry.total_sales));
+
+                            const {
+                                m,
+                                b
+                            } = linearRegression(dates, sales);
+                            console.log("📊 Regression Coefficients:", {
+                                m,
+                                b
+                            });
+
+                            let futureMonth = dates.length + inputMonths;
+                            let predictedSales = m * futureMonth + b;
+                            console.log(`📈 Predicted Sales for Month ${futureMonth}: ₱${predictedSales.toFixed(2)}`);
+
+                            output.innerText = `Predicted Sales: ₱${predictedSales.toFixed(2)}`;
+                        })
+                        .catch(error => console.error('❌ Error fetching sales data:', error));
+                } else {
+                    console.log("⚠️ Invalid Input!");
+                    output.innerText = "Please enter a valid number of months.";
+                }
+            });
+        }
+
+        function linearRegression(x, y) {
+            let n = x.length;
+            let sumX = x.reduce((a, b) => a + b, 0);
+            let sumY = y.reduce((a, b) => a + b, 0);
+            let sumXY = x.map((xi, i) => xi * y[i]).reduce((a, b) => a + b, 0);
+            let sumXX = x.map(xi => xi * xi).reduce((a, b) => a + b, 0);
+
+            let m = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
+            let b = (sumY - m * sumX) / n;
+
+            return {
+                m,
+                b
+            };
+        }
+
 
         function loadSalesChart() {
             fetch('./controllers/sales_data.php')
