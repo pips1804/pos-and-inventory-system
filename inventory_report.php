@@ -4,7 +4,7 @@
             <h4 class="mb-0 text-center">Inventory Report</h4>
         </div>
         <div class="card-body">
-            <table class="table table-bordered table-striped">
+            <table class="table table-dark">
                 <thead class="table-dark">
                     <tr>
                         <th>#</th>
@@ -25,7 +25,7 @@
 
 <script>
     function loadInventoryReport() {
-        fetch('http://192.168.254.111:5000/api/inventory') // Replace with your actual API URL
+        fetch('http://192.168.100.226:5000/api/inventory') // Replace with your actual API URL
             .then(response => response.json())
             .then(data => {
                 console.log("✅ Inventory Data Received:", data);

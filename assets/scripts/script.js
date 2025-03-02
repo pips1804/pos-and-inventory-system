@@ -47,7 +47,7 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 function fetchProducts() {
-  fetch("http://192.168.254.111:5000/api/products")
+  fetch("http://192.168.100.226:5000/api/products")
     .then((response) => response.json())
     .then((data) => {
       const productsContainer = document.querySelector(".products-container");
@@ -60,10 +60,10 @@ function fetchProducts() {
                       <img src="./assets/img/pou.png" class="card-img-top" alt="Product Image">
                       <div class="card-body d-flex flex-column">
                           <h4 class="card-title">${product.pname}</h4>
-                          <p class="card-text">${product.description}</p>
+                          <p class="card-text card-text d-inline-block text-truncate" style="cursor: pointer;" data-bs-toggle="tooltip" title="${product.description});">${product.description}</p>
                           <p class="card-text">₱${product.base_price}</p>
                           <p class="card-text stock" data-id="${product.pid}">Stock: ${product.quantity}</p>
-                          <button class="btn btn-success add-to-cart"
+                          <button class="btn add-to-cart"
                               data-id="${product.pid}"
                               data-name="${product.pname}"
                               data-price="${product.base_price}"
@@ -192,7 +192,7 @@ document
           0
         );
 
-        fetch("http://192.168.254.111:5000/api/update_stock", {
+        fetch("http://192.168.100.226:5000/api/update_stock", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ cart }),
@@ -213,7 +213,7 @@ document
                 .then((salesData) => {
                   if (salesData.status === "success") {
                     // Generate QR Code on POS
-                    fetch("http://192.168.254.111:5001/generate_qr", {
+                    fetch("http://192.168.100.226:5001/generate_qr", {
                       method: "POST",
                       headers: { "Content-Type": "application/json" },
                       body: JSON.stringify({ order_id: orderId }),
@@ -275,7 +275,7 @@ function loadPage(page) {
 }
 
 function loadInventoryReport() {
-  fetch("http://192.168.254.111:5000/api/inventory") // Replace with your actual API URL
+  fetch("http://192.168.100.226:5000/api/inventory") // Replace with your actual API URL
     .then((response) => response.json())
     .then((data) => {
       console.log("✅ Inventory Data Received:", data);
@@ -476,7 +476,7 @@ document
     let formData = new FormData();
     formData.append("qr_code", fileInput.files[0]);
 
-    fetch("http://192.168.254.111:5001/confirm_delivery", {
+    fetch("http://192.168.100.226:5001/confirm_delivery", {
       method: "POST",
       body: formData,
     })
