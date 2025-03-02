@@ -77,12 +77,9 @@ function fetchProducts() {
         productsContainer.innerHTML += productCard;
       });
 
-      console.log(
-        "✅ Products loaded. Reattaching 'Add to Cart' event listeners."
-      );
-      attachAddToCartEvent(); // Reattach event listeners
+      attachAddToCartEvent(); // Reattach event listeners after updating products
     })
-    .catch((error) => console.error("❌ Error fetching products:", error));
+    .catch((error) => console.error("Error fetching products:", error));
 }
 
 setInterval(fetchProducts, 1000);
@@ -108,16 +105,23 @@ function attachAddToCartEvent() {
         },
         body: `product_id=${productId}&quantity=${quantity}`,
       })
-        .then((response) => response.json())
+        .then((response) => response.text()) // Change to .text() to see raw output
         .then((data) => {
-          if (data.status === "error") {
-            alert(data.message);
-          } else {
-            alert("Added to cart successfully!");
-            loadCart(); // Refresh the cart
+          console.log("🛒 Raw Server Response:", data); // Check what the server is returning
+
+          try {
+            const jsonData = JSON.parse(data); // Attempt to parse as JSON
+            if (jsonData.status === "error") {
+              alert(jsonData.message);
+            } else {
+              alert("✅ Added to cart successfully!");
+              loadCart(); // Refresh the cart
+            }
+          } catch (e) {
+            console.error("❌ JSON Parse Error:", e, "Raw Response:", data);
           }
         })
-        .catch((error) => console.error("Error adding to cart:", error));
+        .catch((error) => console.error("❌ Fetch Error:", error));
     });
   });
 }
@@ -136,16 +140,16 @@ function loadCart() {
         totalAmount += itemTotal;
 
         let cartRow = `
-            <tr>
-                <td>${item.name}</td>
-                <td>${item.quantity}</td>
-                <td>₱${item.price}</td>
-                <td>₱${itemTotal}</td>
-                <td>
-                    <button class="btn btn-danger btn-sm remove-from-cart" data-id="${item.id}">Remove</button>
-                </td>
-            </tr>
-        `;
+              <tr>
+                  <td>${item.name}</td>
+                  <td>${item.quantity}</td>
+                  <td>₱${item.price}</td>
+                  <td>₱${itemTotal}</td>
+                  <td>
+                      <button class="btn btn-danger btn-sm remove-from-cart" data-id="${item.id}">Remove</button>
+                  </td>
+              </tr>
+          `;
         cartItems.innerHTML += cartRow;
       });
 
