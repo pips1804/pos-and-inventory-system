@@ -1,21 +1,38 @@
-import requests
+import mysql.connector
+from flask import Flask, request, jsonify
 
-response = requests.get("http://192.168.100.30:5000/api/products")
+app = Flask(__name__)
 
-if response.status_code == 200:
-    products = response.json()
-    print(products)  # Process the data in POS system
-else:
-    print("Error fetching products:", response.status_code)
+# MySQL Connection
+db_config = {
+    "host": "localhost",
+    "user": "root",
+    "password": "",
+    "database": "pos_system",
+}
 
-# Define the API endpoint for purchases
-api_url = "http://192.168.100.30:5000/api/inventory"
+@app.route("/api/confirm_delivery", methods=["GET"])
+def confirm_delivery():
+    order_id = request.args.get("order_id")
 
-# Make a GET request to fetch purchases
-response = requests.get(api_url)
+    if not order_id:
+        return jsonify({"status": "error", "message": "Order ID required"}), 400
 
-if response.status_code == 200:
-    purchases = response.json()
-    print(purchases)  # Process the data in the POS system
-else:
-    print("Error fetching purchases:", response.status_code)
+    try:
+        conn = mysql.connector.connect(**db_config)
+        cursor = conn.cursor()
+
+        # Update order status to delivered
+        cursor.execute("UPDATE sales_and_delivery SET status='delivered' WHERE order_id=%s", (order_id,))
+        conn.commit()
+
+        cursor.close()
+        conn.close()
+
+        return jsonify({"status": "success", "message": "Order marked as delivered!"})
+
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)})
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000, debug=True)

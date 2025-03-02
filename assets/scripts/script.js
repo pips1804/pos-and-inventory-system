@@ -47,7 +47,7 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 function fetchProducts() {
-  fetch("http://192.168.100.30:5000/api/products")
+  fetch("http://192.168.254.111:5000/api/products")
     .then((response) => response.json())
     .then((data) => {
       const productsContainer = document.querySelector(".products-container");
@@ -81,8 +81,6 @@ function fetchProducts() {
     })
     .catch((error) => console.error("Error fetching products:", error));
 }
-
-setInterval(fetchProducts, 1000);
 
 function attachAddToCartEvent() {
   document.querySelectorAll(".add-to-cart").forEach((button) => {
@@ -194,36 +192,45 @@ document
           0
         );
 
-        // Update stock first
-        fetch("http://192.168.100.30:5000/api/update_stock", {
+        fetch("http://192.168.254.111:5000/api/update_stock", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            cart,
-          }),
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ cart }),
         })
           .then((response) => response.json())
           .then((data) => {
             if (data.status === "success") {
-              // Insert into sales and deliver table
+              let orderId = data.order_ids[0]; // Get order_id from update stock
+
               fetch("controllers/add_sales_and_delivery.php", {
                 method: "POST",
                 headers: {
                   "Content-Type": "application/x-www-form-urlencoded",
                 },
-                body: `total_amount=${totalAmount}`,
+                body: `total_amount=${totalAmount}&order_id=${orderId}`,
               })
                 .then((response) => response.json())
                 .then((salesData) => {
                   if (salesData.status === "success") {
-                    // Clear the cart after checkout
-                    fetch("controllers/clear_cart.php", {
+                    // Generate QR Code on POS
+                    fetch("http://192.168.254.111:5001/generate_qr", {
                       method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ order_id: orderId }),
                     })
+                      .then((response) => response.json())
+                      .then((qrData) => {
+                        if (qrData.status === "success") {
+                          alert("Checkout successful! QR Code generated.");
+                          window.open(qrData.qr_code, "_blank");
+                        } else {
+                          alert("QR Code generation failed.");
+                        }
+                      });
+
+                    // Clear the cart
+                    fetch("controllers/clear_cart.php", { method: "POST" })
                       .then(() => {
-                        alert("Checkout successful!");
                         loadCart();
                       })
                       .catch((error) =>
@@ -268,7 +275,7 @@ function loadPage(page) {
 }
 
 function loadInventoryReport() {
-  fetch("http://192.168.100.30:5000/api/inventory") // Replace with your actual API URL
+  fetch("http://192.168.254.111:5000/api/inventory") // Replace with your actual API URL
     .then((response) => response.json())
     .then((data) => {
       console.log("✅ Inventory Data Received:", data);
@@ -455,3 +462,35 @@ function attachSearchFunctionality() {
 document.addEventListener("DOMContentLoaded", function () {
   attachSearchFunctionality();
 });
+
+document
+  .getElementById("uploadQRButton")
+  .addEventListener("click", function () {
+    let fileInput = document.getElementById("qrCodeInput");
+
+    if (fileInput.files.length === 0) {
+      alert("Please select a QR code file to upload.");
+      return;
+    }
+
+    let formData = new FormData();
+    formData.append("qr_code", fileInput.files[0]);
+
+    fetch("http://192.168.254.111:5001/confirm_delivery", {
+      method: "POST",
+      body: formData,
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.status === "success") {
+          document.getElementById("deliveryStatus").innerText = data.message;
+          alert("Delivery confirmed!");
+        } else {
+          alert("Error: " + data.message);
+        }
+      })
+      .catch((error) => {
+        console.error("Error uploading QR code:", error);
+        alert("An error occurred. Please try again.");
+      });
+  });

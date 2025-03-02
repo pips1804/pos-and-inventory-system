@@ -54,6 +54,13 @@
             </div>
         </div>
     </div>
+    <div>
+        <input type="file" id="qrCodeInput" accept="image/*">
+        <button id="uploadQRButton">Confirm Delivery</button>
+        <p id="deliveryStatus"></p>
+    </div>
+   
+
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -82,7 +89,7 @@
         }
 
         function loadInventoryReport() {
-            fetch('http://192.168.100.30:5000/api/inventory') // Replace with your actual API URL
+            fetch('http://192.168.254.111:5000/api/inventory') // Replace with your actual API URL
                 .then(response => response.json())
                 .then(data => {
                     console.log("✅ Inventory Data Received:", data);
