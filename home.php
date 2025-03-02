@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <title>POS System</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/assets/style/style.css">
 </head>
 
 <body class="m-5">
@@ -12,6 +13,8 @@
     <div class="text-center mb-3">
         <a class="btn " href="home.php">Home</a>
         <button class="btn " onclick="loadPage('sales_report')">Sales Report</button>
+        <button class="btn" onclick="loadPage('inventory_report')">Inventory Report</button>
+
     </div>
 
     <div id="content">
@@ -65,13 +68,46 @@
                     if (page === 'sales_report') {
                         console.log("✅ Sales report loaded.");
                         setTimeout(() => {
-                            loadSalesChart(); // Ensure the chart loads correctly
-                            attachPredictionEvent(); // Attach event to Predict button
+                            loadSalesChart();
+                            attachPredictionEvent();
+                        }, 300);
+                    } else if (page === 'inventory_report') {
+                        console.log("✅ Inventory report loaded.");
+                        setTimeout(() => {
+                            loadInventoryReport();
                         }, 300);
                     }
                 })
                 .catch(error => console.error('❌ Error loading page:', error));
         }
+
+        function loadInventoryReport() {
+            fetch('http://192.168.100.30:5000/api/inventory') // Replace with your actual API URL
+                .then(response => response.json())
+                .then(data => {
+                    console.log("✅ Inventory Data Received:", data);
+                    let inventoryTable = document.getElementById('inventoryData');
+                    inventoryTable.innerHTML = '';
+
+                    data.forEach((item, index) => {
+                        inventoryTable.innerHTML += `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td>${item.product_name}</td>
+                            <td>${item.starting_inventory}</td>
+                            <td>${item.inventory_received}</td>
+                            <td>${item.inventory_shipped}</td>
+                            <td><strong>${item.inventory_on_hand}</strong></td>
+                        </tr>
+                    `;
+                    });
+                })
+                .catch(error => console.error('❌ Error fetching inventory data:', error));
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            loadInventoryReport();
+        });
 
         function attachPredictionEvent() {
             let predictBtn = document.getElementById('predictBtn');
