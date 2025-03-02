@@ -6,7 +6,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $quantity = intval($_POST['quantity']);
 
     // Fetch product details from API
-    $api_url = "http://192.168.100.226:5000/api/products"; // Replace with your actual API URL
+    $api_url = "http://192.168.100.30:5000/api/products"; // Replace with your actual API URL
     $api_response = file_get_contents($api_url);
 
     if (!$api_response) {

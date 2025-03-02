@@ -8,7 +8,7 @@
                 <canvas id="salesChart" style="max-width: 1200px;"></canvas>
             </div>
             <div class="text-center mt-4">
-                <input type="number" id="monthsInput" class="form-control w-25 d-inline" placeholder="Enter months">
+                <input type="number" id="monthsInput" class="form-control w-25 d-inline text-black" placeholder="Enter months">
                 <button class="btn btn-primary" id="predictBtn">Predict Sales</button>
                 <h5 class="mt-3" id="predictedSalesOutput"></h5>
             </div>

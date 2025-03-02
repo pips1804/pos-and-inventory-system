@@ -25,7 +25,7 @@
 
 <script>
     function loadInventoryReport() {
-        fetch('http://192.168.100.226:5000/api/inventory') // Replace with your actual API URL
+        fetch('http://192.168.100.30:5000/api/inventory') // Replace with your actual API URL
             .then(response => response.json())
             .then(data => {
                 console.log("✅ Inventory Data Received:", data);

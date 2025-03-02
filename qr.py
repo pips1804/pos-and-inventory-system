@@ -51,6 +51,7 @@ def confirm_delivery():
         file = request.files['qr_code']
         file_path = os.path.join(QR_FOLDER, file.filename)
         file.save(file_path)
+        print(f"📸 Received file: {file.filename}")  # Debugging log
 
         # Decode QR Code
         image = cv2.imread(file_path)
