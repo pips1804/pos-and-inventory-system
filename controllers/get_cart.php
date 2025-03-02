@@ -1,6 +1,7 @@
 <?php
 session_start();
 include('../db_connection/db_connect.php');
+include '../assets/scripts/config.php';
 
 header("Content-Type: application/json");
 
@@ -13,7 +14,7 @@ if (!isset($_SESSION['cart']) || empty($_SESSION['cart'])) {
 $cart = [];
 foreach ($_SESSION['cart'] as $product_id => $item) {
     // Fetch product details from API
-    $apiUrl = "http://192.168.100.30:5000/api/products"; // Adjust API URL if needed
+    $apiUrl = IMS_URL . "/api/products"; // Adjust API URL if needed
     $response = file_get_contents($apiUrl);
     $products = json_decode($response, true);
 

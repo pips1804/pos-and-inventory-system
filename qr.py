@@ -33,7 +33,7 @@ def generate_qr():
             return jsonify({"status": "error", "message": "Order ID is required"}), 400
 
         # Create QR code content
-        qr_data = f"http://localhost:5000/confirm_delivery?order_id={order_id}"
+        qr_data = f"http://localhost:5001/confirm_delivery?order_id={order_id}"
         qr = qrcode.make(qr_data)
         qr_path = os.path.join(QR_FOLDER, f"{order_id}.png")
         qr.save(qr_path)

@@ -1,3 +1,7 @@
+<?php
+include 'assets/scripts/config.php';
+?>
+
 <div class="container mt-4">
     <div class="card shadow-sm">
         <div class="card-header text-white" style="background-color: #00adb5;">
@@ -24,8 +28,10 @@
 </div>
 
 <script>
+    const API_URL = "<?php echo IMS_URL; ?>" + "/api/inventory";
+
     function loadInventoryReport() {
-        fetch('http://192.168.100.30:5000/api/inventory') // Replace with your actual API URL
+        fetch(API_URL) // Replace with your actual API URL
             .then(response => response.json())
             .then(data => {
                 console.log("✅ Inventory Data Received:", data);

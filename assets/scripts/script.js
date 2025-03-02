@@ -1,3 +1,6 @@
+const IMS_URL = "http://192.168.1.3:5000";
+const POS_URL = "http://192.168.1.3:5001";
+
 function showLogoutModal() {
   var logoutModal = new bootstrap.Modal(document.getElementById("logoutModal"));
   logoutModal.show();
@@ -47,7 +50,7 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 function fetchProducts() {
-  fetch("http://192.168.100.30:5000/api/products")
+  fetch(`${IMS_URL}/api/products`)
     .then((response) => response.json())
     .then((data) => {
       const productsContainer = document.querySelector(".products-container");
@@ -192,7 +195,7 @@ document
           0
         );
 
-        fetch("http://192.168.100.30:5000/api/update_stock", {
+        fetch(`${IMS_URL}/api/update_stock`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ cart }),
@@ -213,7 +216,7 @@ document
                 .then((salesData) => {
                   if (salesData.status === "success") {
                     // Generate QR Code on POS
-                    fetch("http://192.168.100.30:5001/generate_qr", {
+                    fetch(`${POS_URL}/generate_qr`, {
                       method: "POST",
                       headers: { "Content-Type": "application/json" },
                       body: JSON.stringify({ order_id: orderId }),
@@ -275,7 +278,7 @@ function loadPage(page) {
 }
 
 function loadInventoryReport() {
-  fetch("http://192.168.100.30:5000/api/inventory") // Replace with your actual API URL
+  fetch(`${IMS_URL}/api/inventory`) // Replace with your actual API URL
     .then((response) => response.json())
     .then((data) => {
       console.log("✅ Inventory Data Received:", data);
@@ -476,7 +479,7 @@ document
     let formData = new FormData();
     formData.append("qr_code", fileInput.files[0]);
 
-    fetch("http://192.168.100.30:5001/confirm_delivery", {
+    fetch(`${POS_URL}/confirm_delivery`, {
       method: "POST",
       body: formData,
     })

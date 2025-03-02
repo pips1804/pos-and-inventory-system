@@ -1,3 +1,6 @@
+const IMS_URL = "http://192.168.1.3:5000";
+const POS_URL = "http://192.168.1.3:5001";
+
 function loadPage(page) {
   if (page === "delivery_report") {
     fetch("./controllers/fetch_deliveries.php")
@@ -104,7 +107,7 @@ function loadPage(page) {
               let formData = new FormData();
               formData.append("qr_code", fileInput.files[0]);
 
-              fetch("http://192.168.100.30:5001/confirm_delivery", {
+              fetch(`${POS_URL}/confirm_delivery`, {
                 method: "POST",
                 body: formData,
               })
@@ -176,7 +179,7 @@ function loadPage(page) {
 }
 
 function loadInventoryReport() {
-  fetch("http://192.168.100.30:5000/api/inventory") // Replace with your actual API URL
+  fetch(`${IMS_URL}/api/inventory`) // Replace with your actual API URL
     .then((response) => response.json())
     .then((data) => {
       console.log("✅ Inventory Data Received:", data);
