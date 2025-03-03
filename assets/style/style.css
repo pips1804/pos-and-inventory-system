@@ -74,3 +74,10 @@ table {
 .text {
   color: #eeeeee;
 }
+
+.sticky-header th {
+  position: sticky;
+  top: 0;
+  background: #343a40; /* Match table-dark background */
+  z-index: 100;
+}

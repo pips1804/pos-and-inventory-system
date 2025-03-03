@@ -1,5 +1,5 @@
-const IMS_URL = "http://192.168.1.3:5000";
-const POS_URL = "http://192.168.1.3:5001";
+const IMS_URL = "http://192.168.100.30:5000";
+const POS_URL = "http://192.168.100.30:5001";
 
 function loadPage(page) {
   if (page === "delivery_report") {
@@ -22,15 +22,14 @@ function loadPage(page) {
               <h4 class="mb-0">Delivery Report</h4>
           </div>
           <div class="card-body">
-              <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
+              <div class="table-responsive" style="max-height: 280px; overflow-y: auto;">
                   <table class="table table-dark">
-                      <thead class="table-dark">
+                      <thead class="table-dark sticky-header">
                           <tr>
-                              <th>#</th>
-                              <th>Order ID</th>
-                              <th>Total (₱)</th>
-                              <th>Customer ID</th>
-                              <th>Status</th>
+                              <th style="text-align: center;">#</th>
+                              <th style="text-align: center;">Order ID</th>
+                              <th style="text-align: center;">Total (₱)</th>
+                              <th style="text-align: center;">Status</th>
                           </tr>
                       </thead>
                       <tbody id="deliveryTableBody">
@@ -40,11 +39,10 @@ function loadPage(page) {
         data.forEach((delivery) => {
           tableHTML += `
         <tr>
-          <td class="text">${index}</td>
-          <td class="text">${delivery.order_id}</td>
-          <td class="text">₱${delivery.total}</td>
-          <td class="text">${delivery.customer_id}</td>
-          <td class="text">${
+          <td class="text text-center">${index}</td>
+          <td class="text text-center">${delivery.order_id}</td>
+          <td class="text text-center">₱${delivery.total}</td>
+          <td class="text text-center">${
             delivery.delivered == 1 ? "Delivered ✅" : "Pending ❌"
           }</td>
         </tr>
@@ -64,7 +62,7 @@ function loadPage(page) {
   <div class="card p-4 shadow-lg border-0 text-center">
       <h4 class="mb-3">Confirm Delivery</h4>
       <input type="file" id="qrCodeInput" class="form-control mb-3 text-dark" accept="image/*">
-      <img id="imagePreview" class="img-fluid mb-3" style="max-width: 200px; display: none;" />
+      <img id="imagePreview" class="img-fluid mb-3" style="max-width: 100px; display: none;" />
       <button id="uploadQRButton" class="btn btn-primary w-100">Confirm Delivery</button>
       <p id="deliveryStatus" class="mt-3"></p>
   </div>
