@@ -52,14 +52,15 @@
                     </tbody>
                 </table>
                 <button id="checkoutButton" class="btn btn-primary">Checkout</button>
+
+                <h1 class="mt-4 mb-4">Add Products</h1>
+                <form id="qrUploadForm" enctype="multipart/form-data">
+                    <input type="file" id="qrCodeFile" accept="image/*" required class="form-control mb-3 text-dark">
+                    <button type="submit" class="btn btn-primary">Upload QR Code</button>
+                </form>
             </div>
         </div>
     </div>
-    <h2>Add Products</h2>
-    <form id="qrUploadForm" enctype="multipart/form-data">
-        <input type="file" id="qrCodeFile" accept="image/*" required>
-        <button type="submit">Upload QR Code</button>
-    </form>
 
 
 

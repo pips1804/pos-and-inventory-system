@@ -1,5 +1,5 @@
-const IMS_URL = "http://192.168.1.3:5000";
-const POS_URL = "http://192.168.1.3:5001";
+const IMS_URL = "http://192.168.100.30:5000";
+const POS_URL = "http://192.168.100.30:5001";
 
 function showLogoutModal() {
   var logoutModal = new bootstrap.Modal(document.getElementById("logoutModal"));
@@ -56,29 +56,39 @@ function fetchProducts() {
       const productsContainer = document.querySelector(".products-container");
       productsContainer.innerHTML = ""; // Clear existing products
 
-      data.forEach((product) => {
-        let productCard = `
-              <div class="col">
-                  <div class="card h-100 d-flex flex-column">
-                      <img src="./assets/img/pou.png" class="card-img-top" alt="Product Image">
-                      <div class="card-body d-flex flex-column">
-                          <h4 class="card-title">${product.pname}</h4>
-                          <p class="card-text card-text d-inline-block text-truncate" style="cursor: pointer;" data-bs-toggle="tooltip" title="${product.description});">${product.description}</p>
-                          <p class="card-text">₱${product.base_price}</p>
-                          <p class="card-text stock" data-id="${product.pid}">Stock: ${product.quantity}</p>
-                          <button class="btn add-to-cart"
-                              data-id="${product.pid}"
-                              data-name="${product.pname}"
-                              data-price="${product.base_price}"
-                              data-stock="${product.quantity}">
-                              Add to Cart
-                          </button>
-                      </div>
-                  </div>
-              </div>
-          `;
-        productsContainer.innerHTML += productCard;
-      });
+      data
+        .filter((product) => product.quantity > 0) // Exclude out-of-stock products
+        .forEach((product) => {
+          // Determine stock color based on quantity
+          let stockColorClass = "green-stock"; // Default green
+
+          if (product.quantity <= 10) stockColorClass = "yellow-stock";
+          if (product.quantity <= 5) stockColorClass = "red-stock";
+
+          let productCard = `
+                <div class="col">
+                    <div class="card h-100 d-flex flex-column">
+                        <img src="./assets/img/pou.png" class="card-img-top" alt="Product Image">
+                        <div class="card-body d-flex flex-column">
+                            <h4 class="card-title">${product.pname}</h4>
+                            <p class="card-text d-inline-block text-truncate" style="cursor: pointer;" data-bs-toggle="tooltip" title="${product.description}">${product.description}</p>
+                            <p class="card-text">₱${product.base_price}</p>
+                          <p class="card-text stock ${stockColorClass}" data-id="${product.pid}">
+                              Stock: ${product.quantity}
+                          </p>
+                            <button class="btn add-to-cart"
+                                data-id="${product.pid}"
+                                data-name="${product.pname}"
+                                data-price="${product.base_price}"
+                                data-stock="${product.quantity}">
+                                Add to Cart
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+          productsContainer.innerHTML += productCard;
+        });
 
       attachAddToCartEvent(); // Reattach event listeners after updating products
     })

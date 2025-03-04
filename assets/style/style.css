@@ -81,3 +81,13 @@ table {
   background: #343a40; /* Match table-dark background */
   z-index: 100;
 }
+
+.yellow-stock {
+  color: yellow !important;
+  font-weight: bold !important;
+}
+
+.red-stock {
+  color: red !important;
+  font-weight: bold !important;
+}
