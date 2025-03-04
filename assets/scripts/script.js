@@ -1,5 +1,5 @@
-const IMS_URL = "http://192.168.100.30:5000";
-const POS_URL = "http://192.168.100.30:5001";
+const IMS_URL = "http://192.168.1.3:5000";
+const POS_URL = "http://192.168.1.3:5001";
 
 function showLogoutModal() {
   var logoutModal = new bootstrap.Modal(document.getElementById("logoutModal"));
@@ -466,34 +466,22 @@ document.addEventListener("DOMContentLoaded", function () {
   attachSearchFunctionality();
 });
 
-document
-  .getElementById("uploadQRButton")
-  .addEventListener("click", function () {
-    let fileInput = document.getElementById("qrCodeInput");
+document.getElementById("qrUploadForm").addEventListener("click", function () {
+  let fileInput = document.getElementById("qrCodeFile").files[0];
+  let formData = new FormData();
+  formData.append("qr_code", fileInput);
 
-    if (fileInput.files.length === 0) {
-      alert("Please select a QR code file to upload.");
-      return;
-    }
+  fetch(`${IMS_URL}/api/add_product`, {
+    method: "POST",
+    body: formData,
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      console.log("Server Response:", data);
 
-    let formData = new FormData();
-    formData.append("qr_code", fileInput.files[0]);
-
-    fetch(`${POS_URL}/confirm_delivery`, {
-      method: "POST",
-      body: formData,
+      if (data.status === "success") {
+        alert("QR Code processed successfully!");
+      }
     })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.status === "success") {
-          document.getElementById("deliveryStatus").innerText = data.message;
-          alert("Delivery confirmed!");
-        } else {
-          alert("Error: " + data.message);
-        }
-      })
-      .catch((error) => {
-        console.error("Error uploading QR code:", error);
-        alert("An error occurred. Please try again.");
-      });
-  });
+    .catch((error) => console.error("Error uploading QR:", error));
+});

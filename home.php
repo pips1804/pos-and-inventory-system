@@ -55,6 +55,11 @@
             </div>
         </div>
     </div>
+    <h2>Add Products</h2>
+    <form id="qrUploadForm" enctype="multipart/form-data">
+        <input type="file" id="qrCodeFile" accept="image/*" required>
+        <button type="submit">Upload QR Code</button>
+    </form>
 
 
 
