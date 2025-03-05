@@ -1,158 +1,161 @@
-const IMS_URL = "http://192.168.100.30:5000";
-const POS_URL = "http://192.168.100.30:5001";
+const IMS_URL = "http://192.168.1.36:5000";
+const POS_URL = "http://192.168.1.36:5001";
+
+function loadDelivery() {
+  fetch("./controllers/fetch_deliveries.php")
+    .then((response) => response.json())
+    .then((data) => {
+      console.log("✅ Delivery Data Received:", data);
+
+      if (!data || data.length === 0) {
+        document.getElementById(
+          "content"
+        ).innerHTML = `<p class="text-center text-muted">No delivery records found.</p>`;
+        return;
+      }
+
+      let tableHTML = `
+<div class="container mt-4">
+    <div class="card shadow-sm">
+        <div class="card-header text-white text-center" style="background-color: #00adb5;">
+            <h4 class="mb-0">Delivery Report</h4>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive" style="max-height: 280px; overflow-y: auto;">
+                <table class="table table-dark">
+                    <thead class="table-dark sticky-header">
+                        <tr>
+                            <th style="text-align: center;">#</th>
+                            <th style="text-align: center;">Order ID</th>
+                            <th style="text-align: center;">Total (₱)</th>
+                            <th style="text-align: center;">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="deliveryTableBody">
+`;
+
+      let index = 1;
+      data.forEach((delivery) => {
+        tableHTML += `
+      <tr>
+        <td class="text text-center">${index}</td>
+        <td class="text text-center">${delivery.order_id}</td>
+        <td class="text text-center">₱${delivery.total}</td>
+        <td class="text text-center">${
+          delivery.delivered == 1 ? "Delivered ✅" : "Pending ❌"
+        }</td>
+      </tr>
+  `;
+        index++;
+      });
+
+      tableHTML += `
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container text-center mt-4">
+<div class="card p-4 shadow-lg border-0 text-center">
+    <h4 class="mb-3">Confirm Delivery</h4>
+    <input type="file" id="qrCodeInput" class="form-control mb-3 text-dark" accept="image/*">
+    <img id="imagePreview" class="img-fluid mb-3" style="max-width: 100px; display: none;" />
+    <button id="uploadQRButton" class="btn btn-primary w-100">Confirm Delivery</button>
+    <p id="deliveryStatus" class="mt-3"></p>
+</div>
+</div>
+`;
+
+      document.getElementById("content").innerHTML = tableHTML;
+      console.log("✅ Delivery Report Loaded.");
+
+      setTimeout(() => {
+        let qrInput = document.getElementById("qrCodeInput");
+        let uploadBtn = document.getElementById("uploadQRButton");
+
+        if (qrInput) {
+          qrInput.addEventListener("change", function (event) {
+            const file = event.target.files[0];
+            if (file) {
+              const reader = new FileReader();
+              reader.onload = function (e) {
+                const imgPreview = document.getElementById("imagePreview");
+                imgPreview.src = e.target.result;
+                imgPreview.style.display = "block";
+              };
+              reader.readAsDataURL(file);
+            }
+          });
+        } else {
+          console.error("❌ qrCodeInput not found!");
+        }
+
+        if (uploadBtn) {
+          uploadBtn.addEventListener("click", function () {
+            let fileInput = document.getElementById("qrCodeInput");
+
+            if (fileInput.files.length === 0) {
+              alert("Please select a QR code file to upload.");
+              return;
+            }
+
+            let formData = new FormData();
+            formData.append("qr_code", fileInput.files[0]);
+
+            fetch(`${POS_URL}/confirm_delivery`, {
+              method: "POST",
+              body: formData,
+            })
+              .then((response) => response.json())
+              .then((data) => {
+                console.log("Server Response:", data);
+
+                if (data.status === "success") {
+                  document.getElementById("deliveryStatus").innerText =
+                    data.message;
+                  alert("Delivery confirmed!");
+
+                  // Ensure order ID is treated as a string for reliable comparison
+                  let orderId = String(data.order_id).trim();
+                  let tableRows = document.querySelectorAll(
+                    "#deliveryTableBody tr"
+                  );
+
+                  tableRows.forEach((row) => {
+                    let orderCell = row.cells[1]; // Order ID column
+                    let orderCellText = orderCell.innerText.trim();
+
+                    console.log(`Comparing: ${orderCellText} vs ${orderId}`); // Debugging
+
+                    if (orderCellText === orderId) {
+                      let statusCell = row.cells[4]; // Status column
+                      statusCell.innerHTML = "Delivered ✅";
+                      console.log(`Updated status for Order ID ${orderId}`);
+                    }
+                  });
+                  loadDelivery();
+                } else {
+                  alert("Error: " + data.message);
+                }
+              })
+              .catch((error) => {
+                console.error("Fetch Error:", error);
+                alert("An error occurred. Check console for details.");
+              });
+          });
+        } else {
+          console.error("❌ uploadQRButton not found!");
+        }
+      }, 100);
+    })
+    .catch((error) => console.error("❌ Error fetching delivery data:", error));
+}
 
 function loadPage(page) {
   if (page === "delivery_report") {
-    fetch("./controllers/fetch_deliveries.php")
-      .then((response) => response.json())
-      .then((data) => {
-        console.log("✅ Delivery Data Received:", data);
-
-        if (!data || data.length === 0) {
-          document.getElementById(
-            "content"
-          ).innerHTML = `<p class="text-center text-muted">No delivery records found.</p>`;
-          return;
-        }
-
-        let tableHTML = `
-  <div class="container mt-4">
-      <div class="card shadow-sm">
-          <div class="card-header text-white text-center" style="background-color: #00adb5;">
-              <h4 class="mb-0">Delivery Report</h4>
-          </div>
-          <div class="card-body">
-              <div class="table-responsive" style="max-height: 280px; overflow-y: auto;">
-                  <table class="table table-dark">
-                      <thead class="table-dark sticky-header">
-                          <tr>
-                              <th style="text-align: center;">#</th>
-                              <th style="text-align: center;">Order ID</th>
-                              <th style="text-align: center;">Total (₱)</th>
-                              <th style="text-align: center;">Status</th>
-                          </tr>
-                      </thead>
-                      <tbody id="deliveryTableBody">
-  `;
-
-        let index = 1;
-        data.forEach((delivery) => {
-          tableHTML += `
-        <tr>
-          <td class="text text-center">${index}</td>
-          <td class="text text-center">${delivery.order_id}</td>
-          <td class="text text-center">₱${delivery.total}</td>
-          <td class="text text-center">${
-            delivery.delivered == 1 ? "Delivered ✅" : "Pending ❌"
-          }</td>
-        </tr>
-    `;
-          index++;
-        });
-
-        tableHTML += `
-                      </tbody>
-                  </table>
-              </div>
-          </div>
-      </div>
-  </div>
-
-  <div class="container text-center mt-4">
-  <div class="card p-4 shadow-lg border-0 text-center">
-      <h4 class="mb-3">Confirm Delivery</h4>
-      <input type="file" id="qrCodeInput" class="form-control mb-3 text-dark" accept="image/*">
-      <img id="imagePreview" class="img-fluid mb-3" style="max-width: 100px; display: none;" />
-      <button id="uploadQRButton" class="btn btn-primary w-100">Confirm Delivery</button>
-      <p id="deliveryStatus" class="mt-3"></p>
-  </div>
-  </div>
-  `;
-
-        document.getElementById("content").innerHTML = tableHTML;
-        console.log("✅ Delivery Report Loaded.");
-
-        setTimeout(() => {
-          let qrInput = document.getElementById("qrCodeInput");
-          let uploadBtn = document.getElementById("uploadQRButton");
-
-          if (qrInput) {
-            qrInput.addEventListener("change", function (event) {
-              const file = event.target.files[0];
-              if (file) {
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                  const imgPreview = document.getElementById("imagePreview");
-                  imgPreview.src = e.target.result;
-                  imgPreview.style.display = "block";
-                };
-                reader.readAsDataURL(file);
-              }
-            });
-          } else {
-            console.error("❌ qrCodeInput not found!");
-          }
-
-          if (uploadBtn) {
-            uploadBtn.addEventListener("click", function () {
-              let fileInput = document.getElementById("qrCodeInput");
-
-              if (fileInput.files.length === 0) {
-                alert("Please select a QR code file to upload.");
-                return;
-              }
-
-              let formData = new FormData();
-              formData.append("qr_code", fileInput.files[0]);
-
-              fetch(`${POS_URL}/confirm_delivery`, {
-                method: "POST",
-                body: formData,
-              })
-                .then((response) => response.json())
-                .then((data) => {
-                  console.log("Server Response:", data);
-
-                  if (data.status === "success") {
-                    document.getElementById("deliveryStatus").innerText =
-                      data.message;
-                    alert("Delivery confirmed!");
-
-                    // Ensure order ID is treated as a string for reliable comparison
-                    let orderId = String(data.order_id).trim();
-                    let tableRows = document.querySelectorAll(
-                      "#deliveryTableBody tr"
-                    );
-
-                    tableRows.forEach((row) => {
-                      let orderCell = row.cells[1]; // Order ID column
-                      let orderCellText = orderCell.innerText.trim();
-
-                      console.log(`Comparing: ${orderCellText} vs ${orderId}`); // Debugging
-
-                      if (orderCellText === orderId) {
-                        let statusCell = row.cells[4]; // Status column
-                        statusCell.innerHTML = "Delivered ✅";
-                        console.log(`Updated status for Order ID ${orderId}`);
-                      }
-                    });
-                  } else {
-                    alert("Error: " + data.message);
-                  }
-                })
-                .catch((error) => {
-                  console.error("Fetch Error:", error);
-                  alert("An error occurred. Check console for details.");
-                });
-            });
-          } else {
-            console.error("❌ uploadQRButton not found!");
-          }
-        }, 100);
-      })
-      .catch((error) =>
-        console.error("❌ Error fetching delivery data:", error)
-      );
+    loadDelivery();
   } else {
     fetch(page + ".php")
       .then((response) => response.text())

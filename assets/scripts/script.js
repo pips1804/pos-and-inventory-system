@@ -1,5 +1,5 @@
-const IMS_URL = "http://192.168.100.30:5000";
-const POS_URL = "http://192.168.100.30:5001";
+const IMS_URL = "http://192.168.1.36:5000";
+const POS_URL = "http://192.168.1.36:5001";
 
 function showLogoutModal() {
   var logoutModal = new bootstrap.Modal(document.getElementById("logoutModal"));
