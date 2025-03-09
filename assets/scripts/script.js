@@ -1,5 +1,5 @@
-const IMS_URL = "http://192.168.1.36:5000";
-const POS_URL = "http://192.168.1.36:5001";
+const IMS_URL = "http://192.168.1.3:5000";
+const POS_URL = "http://192.168.1.3:5001";
 
 function showLogoutModal() {
   var logoutModal = new bootstrap.Modal(document.getElementById("logoutModal"));
@@ -200,36 +200,52 @@ document
     fetch("controllers/get_cart.php")
       .then((response) => response.json())
       .then((cart) => {
+        if (cart.length === 0) {
+          alert("Cart is empty.");
+          return;
+        }
+
         let totalAmount = cart.reduce(
           (sum, item) => sum + item.quantity * item.price,
           0
         );
 
-        fetch(`${IMS_URL}/api/update_stock`, {
+        // Send cart data to IMS for order processing
+        fetch(`${IMS_URL}/api/add_order`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ cart }),
+          body: JSON.stringify({ cart }), // Send full cart data
         })
           .then((response) => response.json())
           .then((data) => {
             if (data.status === "success") {
-              let orderId = data.order_ids[0]; // Get order_id from update stock
+              let orderId = data.order_ids[0]; // Get the first order ID
+              let productList = cart.map((item) => ({
+                product_id: item.id,
+                quantity: item.quantity,
+              }));
 
+              // Send order and product details to POS for sales and delivery
               fetch("controllers/add_sales_and_delivery.php", {
                 method: "POST",
                 headers: {
                   "Content-Type": "application/x-www-form-urlencoded",
                 },
-                body: `total_amount=${totalAmount}&order_id=${orderId}`,
+                body: `total_amount=${totalAmount}&order_id=${orderId}&products=${JSON.stringify(
+                  productList
+                )}`,
               })
                 .then((response) => response.json())
                 .then((salesData) => {
                   if (salesData.status === "success") {
-                    // Generate QR Code on POS
+                    // Generate QR Code on POS with product details
                     fetch(`${POS_URL}/generate_qr`, {
                       method: "POST",
                       headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({ order_id: orderId }),
+                      body: JSON.stringify({
+                        order_id: orderId,
+                        products: productList, // Send cart data in QR code
+                      }),
                     })
                       .then((response) => response.json())
                       .then((qrData) => {
@@ -241,7 +257,7 @@ document
                         }
                       });
 
-                    // Clear the cart
+                    // Clear the cart after successful checkout
                     fetch("controllers/clear_cart.php", { method: "POST" })
                       .then(() => {
                         loadCart();

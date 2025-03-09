@@ -1,5 +1,5 @@
-const IMS_URL = "http://192.168.1.36:5000";
-const POS_URL = "http://192.168.1.36:5001";
+const IMS_URL = "http://192.168.1.3:5000";
+const POS_URL = "http://192.168.1.3:5001";
 
 function loadDelivery() {
   fetch("./controllers/fetch_deliveries.php")
